@@ -1,0 +1,62 @@
+name: Build and deploy ScoutOffice
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: scoutoffice-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ScoutOffice
+        uses: actions/checkout@v4
+      - name: Install Rust and Trunk
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          target: wasm32-unknown-unknown
+      - run: cargo install --locked trunk
+      - name: Build upstream applications
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf build upstream
+          mkdir -p build upstream
+          while read -r key display upstream_repo source_dir binary output_dir upstream_name; do
+            [ "$key" = "-" ] && continue
+            git clone --depth 1 "https://github.com/${upstream_repo}.git" "upstream/${key}"
+            ./scripts/brand-upstream.sh "upstream/${key}/${source_dir}" "$upstream_name" "$display"
+            mkdir -p "build/${output_dir}"
+            (
+              cd "upstream/${key}/${source_dir}"
+              trunk build --release --dist "$GITHUB_WORKSPACE/build/${output_dir}" \
+                --public-url "/${GITHUB_REPOSITORY##*/}/${output_dir}/"
+            )
+          done < <(awk '/^- key:/{key=$3} /display_name:/{display=$2} /upstream:/{upstream=$2} /source_dir:/{source=$2} /binary:/{binary=$2} /output_dir:/{out=$2} /upstream_name:/{name=$2; print key,display,upstream,source,binary,out,name}' apps.yml)
+          cp index.html styles.css -t build
+          mkdir -p build/assets/icons
+          cp assets/icons/*.png build/assets/icons/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - id: deployment
+        uses: actions/deploy-pages@v4
