@@ -4,6 +4,7 @@
   source_dir: apps/wordcraft-web
   binary: wordcraft-web
   output_dir: Word
+  asset_prefix: wordcraft
   upstream_name: WordCraft
 - key: excel
   display_name: Excel
@@ -11,6 +12,7 @@
   source_dir: apps/gridcraft-web
   binary: gridcraft-web
   output_dir: Excel
+  asset_prefix: gridcraft
   upstream_name: GridCraft
 - key: powerpoint
   display_name: PowerPoint
@@ -18,6 +20,7 @@
   source_dir: apps/deckcraft-web
   binary: deckcraft-web
   output_dir: PowerPoint
+  asset_prefix: deckcraft
   upstream_name: DeckCraft
 - key: pdf
   display_name: PDF
@@ -25,6 +28,7 @@
   source_dir: apps/pdfcraft-web
   binary: pdfcraft-web
   output_dir: PDF
+  asset_prefix: pdfcraft
   upstream_name: PdfCraft
 - key: photoshop
   display_name: Photoshop
@@ -32,6 +36,7 @@
   source_dir: apps/photocraft-web
   binary: photocraft-web
   output_dir: Photoshop
+  asset_prefix: photocraft
   upstream_name: PhotoCraft
 - key: premiere
   display_name: Premiere
@@ -39,6 +44,7 @@
   source_dir: apps/filmcraft-web
   binary: filmcraft-web
   output_dir: Premiere
+  asset_prefix: filmcraft
   upstream_name: FilmCraft
 - key: illustrator
   display_name: Illustrator
@@ -46,4 +52,5 @@
   source_dir: apps/vectorcraft-web
   binary: vectorcraft-web
   output_dir: Illustrator
+  asset_prefix: vectorcraft
   upstream_name: VectorCraft

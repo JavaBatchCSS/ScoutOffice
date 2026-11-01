@@ -1,4 +1,4 @@
-name: Deploy ScoutOffice portal
+name: Deploy ScoutOffice
 
 on:
   push:
@@ -21,10 +21,29 @@ jobs:
       - name: Checkout ScoutOffice
         uses: actions/checkout@v4
       - name: Assemble portal
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          mkdir -p build/assets/icons
+          set -euo pipefail
+          rm -rf build
+          mkdir -p build
           cp index.html styles.css build/
-          cp assets/icons/*.png build/assets/icons/
+          while read -r key display upstream_repo source_dir binary output_dir upstream_name asset_prefix; do
+            [ "$key" = "-" ] && continue
+            release_dir="$RUNNER_TEMP/releases/$key"
+            mkdir -p "$release_dir" "build/$output_dir"
+            gh release download --repo "$upstream_repo" --pattern "${asset_prefix}-web-*.zip" --dir "$release_dir" --clobber
+            archive="$(find "$release_dir" -maxdepth 1 -type f -name '*.zip' -print -quit)"
+            test -n "$archive"
+            unzip -q "$archive" -d "$release_dir/unpacked"
+            root="$(find "$release_dir/unpacked" -mindepth 1 -maxdepth 1 -type d -print -quit)"
+            test -n "$root"
+            cp -a "$root"/. "build/$output_dir"/
+            find "build/$output_dir" -type f -name '*.html' -exec sed -i \
+              -e "s/${upstream_name}/${display}/g" \
+              -e 's/<html lang="en">/<html lang="fr">/g' \
+              -e 's/Loading /Chargement de /g' {} +
+          done < <(awk '/^- key:/{key=$3} /display_name:/{display=$2} /upstream:/{upstream=$2} /source_dir:/{source=$2} /binary:/{binary=$2} /output_dir:/{out=$2} /asset_prefix:/{prefix=$2} /upstream_name:/{name=$2; print key,display,upstream,source,binary,out,name,prefix}' apps.yml)
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build
