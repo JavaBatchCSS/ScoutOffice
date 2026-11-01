@@ -28,7 +28,7 @@ jobs:
           rm -rf build
           mkdir -p build
           cp index.html styles.css build/
-          while read -r key display upstream_repo source_dir binary output_dir upstream_name asset_prefix; do
+          while read -r key display upstream_repo source_dir binary output_dir upstream_name asset_prefix icon; do
             [ "$key" = "-" ] && continue
             release_dir="$RUNNER_TEMP/releases/$key"
             mkdir -p "$release_dir" "build/$output_dir"
@@ -39,11 +39,14 @@ jobs:
             root="$(find "$release_dir/unpacked" -mindepth 1 -maxdepth 1 -type d -print -quit)"
             test -n "$root"
             cp -a "$root"/. "build/$output_dir"/
+            cp "assets/icons/$icon" "build/$output_dir/favicon.png"
             find "build/$output_dir" -type f -name '*.html' -exec sed -i \
               -e "s/${upstream_name}/${display}/g" \
               -e 's/<html lang="en">/<html lang="fr">/g' \
               -e 's/Loading /Chargement de /g' {} +
-          done < <(awk '/^- key:/{key=$3} /display_name:/{display=$2} /upstream:/{upstream=$2} /source_dir:/{source=$2} /binary:/{binary=$2} /output_dir:/{out=$2} /asset_prefix:/{prefix=$2} /upstream_name:/{name=$2; print key,display,upstream,source,binary,out,name,prefix}' apps.yml)
+            find "build/$output_dir" -type f -name '*.html' -exec sed -i \
+              '/<head>/a <link rel="icon" type="image/png" href="favicon.png">' {} +
+          done < <(awk '/^- key:/{key=$3} /display_name:/{display=$2} /upstream:/{upstream=$2} /source_dir:/{source=$2} /binary:/{binary=$2} /output_dir:/{out=$2} /asset_prefix:/{prefix=$2} /icon:/{icon=$2} /upstream_name:/{name=$2; print key,display,upstream,source,binary,out,name,prefix,icon}' apps.yml)
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build
