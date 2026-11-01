@@ -29,6 +29,9 @@ jobs:
       - run: cargo install --locked trunk
       - name: Build upstream applications
         shell: bash
+        env:
+          RUSTFLAGS: ""
+          CARGO_ENCODED_RUSTFLAGS: ""
         run: |
           set -euo pipefail
           rm -rf build upstream
@@ -40,7 +43,7 @@ jobs:
             mkdir -p "build/${output_dir}"
             (
               cd "upstream/${key}/${source_dir}"
-              RUSTFLAGS="--cap-lints allow" trunk build --release --dist "$GITHUB_WORKSPACE/build/${output_dir}" \
+              trunk build --release --dist "$GITHUB_WORKSPACE/build/${output_dir}" \
                 --public-url "/${GITHUB_REPOSITORY##*/}/${output_dir}/"
             )
           done < <(awk '/^- key:/{key=$3} /display_name:/{display=$2} /upstream:/{upstream=$2} /source_dir:/{source=$2} /binary:/{binary=$2} /output_dir:/{out=$2} /upstream_name:/{name=$2; print key,display,upstream,source,binary,out,name}' apps.yml)
