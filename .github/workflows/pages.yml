@@ -37,7 +37,7 @@ jobs:
           yarn install --frozen-lockfile
           yarn --cwd excalidraw-app vite build --base=./
           mkdir -p "$GITHUB_WORKSPACE/build/Draw"
-          cp -a excalidraw-app/dist/. "$GITHUB_WORKSPACE/build/Draw/"
+          cp -a excalidraw-app/build/. "$GITHUB_WORKSPACE/build/Draw/"
           cd "$RUNNER_TEMP/tiddlywiki"
           node ./tiddlywiki.js editions/fr-FR --build index
           mkdir -p "$GITHUB_WORKSPACE/build/Notes"
