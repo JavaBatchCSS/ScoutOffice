@@ -20,13 +20,35 @@ jobs:
     steps:
       - name: Checkout ScoutOffice
         uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build browser notes and drawing apps
+        run: |
+          set -euo pipefail
+          rm -rf build
+          mkdir -p build
+          rm -rf "$RUNNER_TEMP/excalidraw" "$RUNNER_TEMP/tiddlywiki"
+          git clone --depth 1 https://github.com/excalidraw/excalidraw.git "$RUNNER_TEMP/excalidraw"
+          git clone --depth 1 https://github.com/TiddlyWiki/TiddlyWiki5.git "$RUNNER_TEMP/tiddlywiki"
+          npm install --global yarn@1.22.22
+          cd "$RUNNER_TEMP/excalidraw"
+          yarn install --frozen-lockfile
+          yarn --cwd excalidraw-app vite build --base=./
+          mkdir -p "$GITHUB_WORKSPACE/build/Draw"
+          cp -a excalidraw-app/dist/. "$GITHUB_WORKSPACE/build/Draw/"
+          cd "$RUNNER_TEMP/tiddlywiki"
+          node ./tiddlywiki.js editions/fr-FR --build index
+          mkdir -p "$GITHUB_WORKSPACE/build/Notes"
+          cp editions/fr-FR/output/index.html "$GITHUB_WORKSPACE/build/Notes/index.html"
+          cp "$GITHUB_WORKSPACE/assets/icons/TiddlyWiki.png" "$GITHUB_WORKSPACE/build/Notes/favicon.png"
+          sed -i '/<head>/a <link rel="icon" type="image/png" href="favicon.png">' "$GITHUB_WORKSPACE/build/Notes/index.html"
       - name: Assemble portal
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          rm -rf build
-          mkdir -p build
           cp index.html styles.css build/
           while read -r key display upstream_repo source_dir binary output_dir upstream_name asset_prefix icon; do
             [ "$key" = "-" ] && continue
