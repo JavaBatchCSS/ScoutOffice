@@ -41,3 +41,4 @@ footer a:hover{color:var(--gold-dark)}
 .gh-link:hover{border-color:var(--gold);box-shadow:var(--shadow)}
 @media(max-width:600px){main{padding-top:35px}.topbar{padding:0 20px}.app-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.app-card{transition:none}.app-card:hover{transform:none}}
+.brand-logo{width:40px;height:40px;object-fit:contain;border-radius:50%;background:#fff;padding:2px}
