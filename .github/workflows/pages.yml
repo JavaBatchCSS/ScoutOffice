@@ -44,7 +44,11 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/build/Notes"
           cp editions/fr-FR/output/index.html "$GITHUB_WORKSPACE/build/Notes/index.html"
           cp "$GITHUB_WORKSPACE/assets/icons/TiddlyWiki.png" "$GITHUB_WORKSPACE/build/Notes/favicon.png"
-          sed -i '/<head>/a <link rel="icon" type="image/png" href="favicon.png">' "$GITHUB_WORKSPACE/build/Notes/index.html"
+          cp "$GITHUB_WORKSPACE/assets/styles/notes.css" "$GITHUB_WORKSPACE/build/Notes/notes.css"
+          sed -i \
+            -e '/<head>/a <link rel="icon" type="image/png" href="favicon.png">' \
+            -e '/<head>/a <link rel="stylesheet" href="notes.css">' \
+            "$GITHUB_WORKSPACE/build/Notes/index.html"
       - name: Assemble portal
         env:
           GH_TOKEN: ${{ github.token }}
