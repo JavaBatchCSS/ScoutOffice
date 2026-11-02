@@ -1,0 +1,18 @@
+.tc-story-river {
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tc-tiddler-frame {
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 900px) {
+  .tc-story-river,
+  .tc-tiddler-frame {
+    max-width: none;
+  }
+}
